@@ -20,12 +20,19 @@ namespace RaspSGkVk2
 
         public long IdGroup { get; set; }
 
-        public List<SettingsVk> SettingsVk { get; set; }
+        public List<SettingsVk> SettingsVkList { get; set; }
         //Лист админов
         public List<ListAdmins> AdminsList { get; set; }
         //База слов
         public List<Book> Books { get; set; }
 
+
+        public Settings()
+        {
+            SettingsVkList = new List<SettingsVk>();
+            AdminsList = new List<ListAdmins>();
+            Books = new List<Book>();
+        }
 
         /// <summary>
         /// Загрузка настроек из файла
@@ -90,13 +97,13 @@ namespace RaspSGkVk2
         {
             SettingsVk temp = new SettingsVk()
             {
-                IdTask = SettingsVk.Count + 1,
+                IdTask = SettingsVkList.Count + 1,
                 TypeTask = typeTask,
                 Value = value,
                 PeerId = peerId
             };
 
-            SettingsVk.Add(temp);
+            SettingsVkList.Add(temp);
         }
 
         /// <summary>
@@ -105,8 +112,8 @@ namespace RaspSGkVk2
         /// <param name="id"></param>
         public void DelTask(int id)
         {
-            var temp = SettingsVk.FirstOrDefault(x => x.IdTask == id);
-            SettingsVk.Remove(temp);
+            var temp = SettingsVkList.FirstOrDefault(x => x.IdTask == id);
+            SettingsVkList.Remove(temp);
         }
 
     }

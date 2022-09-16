@@ -6,11 +6,56 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static RaspSGkVk2.Program;
-
 namespace RaspSGkVk2.Models
 {
     public class Controller
     {
+        private Settings settings = Program.settings;
+
+        public string FindAddNewTask(string value, string ValueIdPeer)
+        {
+            var teachers = GetTeachers();
+            var groups = GetGroup();
+
+            var found_teach = teachers.FirstOrDefault(x => x.name.ToLower() == value.ToLower());
+            var found_group = groups.FirstOrDefault(x => x.name.ToUpper() == value.ToUpper());
+
+            if (found_teach != null)
+            {
+                SettingsVk temp = new SettingsVk()
+                {
+                    IdTask = settings.SettingsVkList.Count + 1,
+                    TypeTask = 'T',
+                    Value = found_teach.id,
+                    PeerId = ValueIdPeer
+                };
+
+                WriteWaring($"Задача #{temp.IdTask} была добавлена. Тип - преподаватель. Значение - #{temp.Value}. Беседа #{temp.PeerId}");
+                settings.SettingsVkList.Add(temp);
+                settings.SaveSettings();
+
+                return found_teach.name;
+            }
+
+            if(found_group != null)
+            {
+                SettingsVk temp = new SettingsVk()
+                {
+                    IdTask = settings.SettingsVkList.Count + 1,
+                    TypeTask = 'G',
+                    Value = found_group.id.ToString(),
+                    PeerId = ValueIdPeer
+                };
+
+                WriteWaring($"Задача #{temp.IdTask} была добавлена. Тип - преподаватель. Значение - #{temp.Value}. Беседа #{temp.PeerId}");
+                settings.SettingsVkList.Add(temp);
+                settings.SaveSettings();
+                return found_group.name;
+            }
+
+            return "";
+        }
+
 
 
         /// <summary>
@@ -19,7 +64,7 @@ namespace RaspSGkVk2.Models
         /// <returns></returns>
         public List<Group> GetGroup()
         {
-            var json = $"https://mfc.samgk.ru/api/groups";
+            var json = Response("https://mfc.samgk.ru/api/groups");
             try
             {
                 var groups = JsonSerializer.Deserialize<List<Group>>(json);
@@ -38,7 +83,7 @@ namespace RaspSGkVk2.Models
         /// <returns></returns>
         public List<Teacher> GetTeachers()
         {
-            var json = $"https://asu.samgk.ru/api/teachers";
+            var json = Response("https://asu.samgk.ru/api/teachers");
             try
             {
                 var teachers = JsonSerializer.Deserialize<List<Teacher>>(json);

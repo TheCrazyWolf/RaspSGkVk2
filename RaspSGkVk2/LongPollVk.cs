@@ -9,6 +9,7 @@ using VkNet.Model.RequestParams;
 using static RaspSGkVk2.Program;
 using VkNet.Model.GroupUpdate;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace RaspSGkVk2
 {
@@ -60,14 +61,41 @@ namespace RaspSGkVk2
                     //string user_msg = new Regex("\\[.*\\][\\s,]*").Replace(item.Message.Text.ToLower(),"");
                     //var command = user_msg.Split(" ");
 
+                    Models.Controller controller = new Models.Controller();
 
                     switch (user_msg[0])
                     {
+
                         case "начать":
                         case "старт":
                             Send("Добро пожаловать, сейчас бот все еще разрабатывается. Посмотри справку - !помощь", item.Message.PeerId);
                             break;
 
+                        case "!доб":
+                            var result = controller.FindAddNewTask(user_msg[1], item.Message.PeerId.ToString());
+                            if (result != "")
+                            {
+                                Send($"{result} добавлена в настройки", item.Message.PeerId);
+                            }
+                            else
+                            {
+                                Send($"Группа или преподаватель не найдены", item.Message.PeerId);
+                            }
+                            break;
+
+                        case "!преподы":
+                            var test = controller.GetTeachers();
+                            string text = "";
+
+                            foreach (var item2 in test)
+                            {
+                                Thread.Sleep(900);
+                                Send($"{item2.id}. {item2.name}", item.Message.PeerId);
+                                
+                            }
+                            //Send(text, item.Message.PeerId);
+
+                            break;
                         default:
                             break;
                     }
