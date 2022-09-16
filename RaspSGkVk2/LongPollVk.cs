@@ -8,6 +8,7 @@ using VkNet.Enums.SafetyEnums;
 using VkNet.Model.RequestParams;
 using static RaspSGkVk2.Program;
 using VkNet.Model.GroupUpdate;
+using System.Text.RegularExpressions;
 
 namespace RaspSGkVk2
 {
@@ -15,7 +16,7 @@ namespace RaspSGkVk2
     {
         public void StartLongPoll()
         {
-            Write("Подключение к LongPoll серверу");
+            Write("[LongPoll] Подключение к серверу");
             while (true)
             {
                 try
@@ -31,11 +32,13 @@ namespace RaspSGkVk2
                     });
 
                     if (poll?.Updates == null) continue;
+
                     CheckPoll(poll);
 
                 }
                 catch (Exception ex)
                 {
+                    Write("[LongPoll] Ошибка при подключении к серверу");
                     WriteError(ex.ToString());
                 }
             }
@@ -44,26 +47,56 @@ namespace RaspSGkVk2
 
         public void CheckPoll(BotsLongPollHistoryResponse response)
         {
+            Write($"[LongPoll] Получено {response.Updates.Count()} событий");
             foreach (var item in response.Updates)
             {
-
+                
                 if (item.Type == GroupUpdateType.MessageNew)
                 {
-                    string user_msg = item.Message.Text.ToLower();
+                    Write($"[LongPoll] MessageNew -> Беседа #{item.Message.PeerId}. Отправитель #{item.Message.FromId}. Содержимое: {item.Message.Text}");
 
-                    if (user_msg == "[club186654758|@sgkmeme] хай")
+                    string user_msg = new Regex("\\[.*\\][\\s,]*").Replace(item.Message.Text.ToLower(),"");
+                    var command = user_msg.Split(" ");
+
+                    if (user_msg == "начать")
                     {
-                        api.Messages.Send(new MessagesSendParams()
+                        Send("Добро пожаловать, сейчас бот все еще разрабатывается. Посмотри справку - !помощь", item.Message.PeerId);
+                    }
+                    else if (command[0] == "!помощь")
+                    {
+                        Send("ОК!", item.Message.PeerId);
+                    }
+                    else if (command[0] == "!админ")
+                    {
+                        if (item.Message.FromId != 133156422)
                         {
+                            Send("ОК!", item.Message.PeerId);
+                        }
+                        else
+                        {
+                            Send("ОК!", item.Message.PeerId);
+                        }
 
-                            Message = "[eq",
-                            PeerId = item.Message.PeerId,
-                            RandomId = new Random().Next()
-                        });
                     }
 
+
                 }
+
             }
+        }
+
+
+
+        public void Send(string text, long? peerid)
+        {
+            Write($"[VK] Message.Send -> Беседа #{peerid}. Содержимое: {text}");
+            api.Messages.Send(new MessagesSendParams()
+            {
+
+                Message = text,
+                PeerId = peerid,
+                RandomId = new Random().Next()
+            });
         }
 
 
