@@ -46,17 +46,18 @@ namespace RaspSGkVk2
         {
             foreach (var item in response.Updates)
             {
-                
+
                 if (item.Type == GroupUpdateType.MessageNew)
                 {
-                    string user_msg = item.Message.Body.ToLower();
+                    string user_msg = item.Message.Text.ToLower();
 
                     if (user_msg == "[club186654758|@sgkmeme] хай")
                     {
                         api.Messages.Send(new MessagesSendParams()
                         {
-                            Message = "хай",
-                            PeerId = item.Message.ChatId,
+
+                            Message = "[eq",
+                            PeerId = item.Message.PeerId,
                             RandomId = new Random().Next()
                         });
                     }
