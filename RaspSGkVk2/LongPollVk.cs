@@ -16,13 +16,13 @@ namespace RaspSGkVk2
     {
         public void StartLongPoll()
         {
-            Write("[LongPoll] Подключение к серверу");
+            Write("Подключение к серверу");
             while (true)
             {
                 try
                 {
                     //Реализовать автоматическую выддачу ID группы
-                    var s = api.Groups.GetLongPollServer(186654758);
+                    var s = api.Groups.GetLongPollServer((ulong)Program.settings.IdGroup);
                     var poll = api.Groups.GetBotsLongPollHistory(new BotsLongPollHistoryParams()
                     {
                         Server = s.Server,
@@ -38,7 +38,7 @@ namespace RaspSGkVk2
                 }
                 catch (Exception ex)
                 {
-                    Write("[LongPoll] Ошибка при подключении к серверу");
+                    Write("Ошибка при подключении к серверу");
                     WriteError(ex.ToString());
                 }
             }
@@ -47,37 +47,52 @@ namespace RaspSGkVk2
 
         public void CheckPoll(BotsLongPollHistoryResponse response)
         {
-            Write($"[LongPoll] Получено {response.Updates.Count()} событий");
+            //Write($"{response.Updates.Count()} событие.");
             foreach (var item in response.Updates)
             {
                 
                 if (item.Type == GroupUpdateType.MessageNew)
                 {
-                    Write($"[LongPoll] MessageNew -> Беседа #{item.Message.PeerId}. Отправитель #{item.Message.FromId}. Содержимое: {item.Message.Text}");
+                    Write($"[MessageNew] <- Беседа #{item.Message.PeerId}. Отправитель #{item.Message.FromId}. Содержимое: {item.Message.Text}");
 
-                    string user_msg = new Regex("\\[.*\\][\\s,]*").Replace(item.Message.Text.ToLower(),"");
-                    var command = user_msg.Split(" ");
+                    var user_msg = new Regex("\\[.*\\][\\s,]*").Replace(item.Message.Text.ToLower(),"").Split(" ");
 
-                    if (user_msg == "начать")
-                    {
-                        Send("Добро пожаловать, сейчас бот все еще разрабатывается. Посмотри справку - !помощь", item.Message.PeerId);
-                    }
-                    else if (command[0] == "!помощь")
-                    {
-                        Send("ОК!", item.Message.PeerId);
-                    }
-                    else if (command[0] == "!админ")
-                    {
-                        if (item.Message.FromId != 133156422)
-                        {
-                            Send("ОК!", item.Message.PeerId);
-                        }
-                        else
-                        {
-                            Send("ОК!", item.Message.PeerId);
-                        }
+                    //string user_msg = new Regex("\\[.*\\][\\s,]*").Replace(item.Message.Text.ToLower(),"");
+                    //var command = user_msg.Split(" ");
 
+
+                    switch (user_msg[0])
+                    {
+                        case "начать":
+                        case "старт":
+                            Send("Добро пожаловать, сейчас бот все еще разрабатывается. Посмотри справку - !помощь", item.Message.PeerId);
+                            break;
+
+                        default:
+                            break;
                     }
+
+
+                    //if (user_msg[0] == "начать")
+                    //{
+                    //    Send("Добро пожаловать, сейчас бот все еще разрабатывается. Посмотри справку - !помощь", item.Message.PeerId);
+                    //}
+                    //else if (user_msg[0] == "!помощь")
+                    //{
+                    //    Send("ОК!", item.Message.PeerId);
+                    //}
+                    //else if (user_msg[0] == "!админ")
+                    //{
+                    //    if (item.Message.FromId != 133156422)
+                    //    {
+                    //        Send("ОК!", item.Message.PeerId);
+                    //    }
+                    //    else
+                    //    {
+                    //        Send("ОК!", item.Message.PeerId);
+                    //    }
+
+                    //}
 
 
                 }
@@ -87,16 +102,28 @@ namespace RaspSGkVk2
 
 
 
+        /// <summary>
+        /// Отправка сообщений в вк!
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="peerid"></param>
         public void Send(string text, long? peerid)
         {
-            Write($"[VK] Message.Send -> Беседа #{peerid}. Содержимое: {text}");
-            api.Messages.Send(new MessagesSendParams()
+            Write($"[MessageSend] -> Беседа #{peerid}. Содержимое: {text}");
+            try
             {
+                api.Messages.Send(new MessagesSendParams()
+                {
 
-                Message = text,
-                PeerId = peerid,
-                RandomId = new Random().Next()
-            });
+                    Message = text,
+                    PeerId = peerid,
+                    RandomId = new Random().Next()
+                });
+            }
+            catch (Exception ex)
+            {
+                WriteError(ex.ToString());
+            }
         }
 
 
