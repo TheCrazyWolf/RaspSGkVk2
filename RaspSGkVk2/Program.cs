@@ -15,11 +15,13 @@ namespace RaspSGkVk2
         {
             settings = settings.LoadSettings();
 
+            settings.TokenVk = "vk1.a.zk8koagIasC5z9zyjZRd8LQeXV2Sd3QrrnVA1X3YOOXWr0sQtcFzeuzhPRQFX7N66x_AQuIkRW009fL8BzcAcGIbELUBtXFwo71Z36LT_DEShn48zthPCNe7-yBRl8YgTtHDnW4nBG-iJ-1cQTX0lVsyBZ5JrRg-Gd5492a6lF2qi4vTdFu8MDHq1cd-s5Yk";
+
             Auth();
 
-            lpoll.StartLongPoll();
+            //lpoll.StartLongPoll();
 
-            //Task.Run(()=> lpoll.StartLongPoll());
+            Task.Run(()=> lpoll.StartLongPoll());
             Console.ReadLine();
 
         }
