@@ -210,7 +210,7 @@ namespace RaspSGkVk2.Models
 
             foreach (var item in settings.SettingsVkList)
             {
-                text += $"#{item.IdTask}. Peer #{item.PeerId}. Value {item.Value}";
+                text += $"#{item.IdTask}. Peer #{item.PeerId}. Value {item.Value}\n";
             }
 
             return text;
