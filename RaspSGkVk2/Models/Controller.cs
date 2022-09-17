@@ -24,7 +24,7 @@ namespace RaspSGkVk2.Models
             {
                 Thread.Sleep(settings.Timer);
 
-                if (DateTime.Now.Hour >= 22 && DateTime.Now.Hour <= 7)
+                if (DateTime.Now.Hour >= 22 && DateTime.Now.Hour <= 9)
                     continue;
 
                 try
@@ -34,14 +34,13 @@ namespace RaspSGkVk2.Models
                         Thread.Sleep(500);
                         Write($"Выполяется задача #{item.IdTask}");
 
-
-                        //Дата на завтра! Поправить (ТОЛЬКО 1 день)
                         var s = GetLessons(DateTime.Now.AddDays(1), item.TypeTask, Convert.ToInt32(item.Value));
                         string rasp = GetLessonsString(s);
 
                         if (item.ResultText != rasp)
                         {
                             item.ResultText = rasp;
+                            item.Result = s;
 
                             Send(rasp, Convert.ToInt64(item.PeerId));
                         }
