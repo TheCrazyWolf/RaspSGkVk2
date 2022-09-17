@@ -143,7 +143,7 @@ namespace RaspSGkVk2.Models
         public string AddNewAdmin(GroupUpdate groupupdate, string[] user_msg)
         {
 
-            if (isAdmin(groupupdate, user_msg))
+            if (!isAdmin(groupupdate, user_msg))
                 return "Нет прав";
 
             ListAdmins admin = new ListAdmins()
@@ -162,7 +162,7 @@ namespace RaspSGkVk2.Models
         // Массовая рассылка
         public string SendAllResponse(GroupUpdate groupupdate, string[] user_msg)
         {
-            if (isAdmin(groupupdate, user_msg))
+            if (!isAdmin(groupupdate, user_msg))
                 return "Нет прав";
 
             string command = "";
@@ -183,7 +183,7 @@ namespace RaspSGkVk2.Models
         // Вывод всех задач
         public string GetTasks(GroupUpdate groupupdate, string[] user_msg)
         {
-            if (isAdmin(groupupdate, user_msg))
+            if (!isAdmin(groupupdate, user_msg))
                 return "Нет прав";
 
             string text = "Активные задачи\n";
@@ -200,7 +200,7 @@ namespace RaspSGkVk2.Models
         //Удаление задач
         public string DeleteTaskAdmin(GroupUpdate groupupdate, string[] user_msg)
         {
-            if (isAdmin(groupupdate, user_msg))
+            if (!isAdmin(groupupdate, user_msg))
                 return "Нет прав";
 
             var findtask = settings.SettingsVkList.FirstOrDefault(x => x.IdTask.ToString() == user_msg[1]);
@@ -216,22 +216,24 @@ namespace RaspSGkVk2.Models
             }
 
         }
+        
 
 
 
+        // Проверка на админа
         public bool isAdmin(GroupUpdate groupupdate, string[] user_msg)
         {
             var id_sender = groupupdate.Message.FromId;
 
             var find = settings.AdminsList.FirstOrDefault(x => x.Value == id_sender.Value.ToString());
 
-            if (find == null)
+            if (find != null)
             {
-                return false;
+                return true;
             }
             else
             {
-                return true;
+                return false;
             }
         }
 
@@ -324,10 +326,6 @@ namespace RaspSGkVk2.Models
 
             return msg;
         }
-
-
-
-
 
         //Ответы из словаря, случайные ответы
         public string GetAnswer(GroupUpdate groupupdate, string[] user_msg)
