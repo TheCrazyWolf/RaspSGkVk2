@@ -16,10 +16,9 @@ namespace RaspSGkVk2
         public string TokenVk { get; set; }
         //Тайм аут между запросами
         public int Timer { get; set; }
-        //Лист с настройками бесед
-
+        // ID группы
         public long IdGroup { get; set; }
-
+        //Лист с настройками бесед
         public List<SettingsVk> SettingsVkList { get; set; }
         //Лист админов
         public List<ListAdmins> AdminsList { get; set; }

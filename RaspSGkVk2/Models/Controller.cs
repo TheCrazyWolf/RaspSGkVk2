@@ -17,12 +17,15 @@ namespace RaspSGkVk2.Models
     {
         private Settings settings = Program.settings;
 
-        // основной Шедулер
+        // Основной шедулер
         public void Sheduler()
         {
             while (true)
             {
                 Thread.Sleep(settings.Timer);
+
+                if (DateTime.Now.Hour >= 22 && DateTime.Now.Hour <= 7)
+                    continue;
 
                 try
                 {
