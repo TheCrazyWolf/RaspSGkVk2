@@ -17,10 +17,6 @@ namespace RaspSGkVk2.Models
     {
         private Settings settings = Program.settings;
 
-
-
-
-
         // основной Шедулер
         public void Sheduler()
         {
@@ -61,6 +57,71 @@ namespace RaspSGkVk2.Models
             }
         }
 
+
+        // ОСНОВНЫЕ КОМАНДЫ
+        // Добавление задач
+        public string FindAddNewTask(GroupUpdate groupupdate, string[] user_msg)
+        {
+
+            var findpeer = settings.SettingsVkList.FirstOrDefault(x => x.PeerId == groupupdate.Message.PeerId.ToString());
+            if (findpeer != null)
+                return $"Существующая беседа {groupupdate.Message.PeerId} уже привязана к (id #{findpeer.IdTask} / {findpeer.Value}) ";
+
+            var teachers = GetTeachers();
+            var groups = GetGroup();
+
+
+            string text_teach = "";
+
+            foreach (var item in user_msg)
+            {
+                if (item != "!привязать")
+                    text_teach += $" {item}";
+            }
+
+            text_teach = text_teach.Remove(0, 1);
+
+            var found_teach = teachers.FirstOrDefault(x => x.name.ToLower() == text_teach.ToLower());
+            //var found_teach = teachers.FirstOrDefault(x => x.name.ToLower() == user_msg[1].ToLower());
+
+            var found_group = groups.FirstOrDefault(x => x.name.ToUpper() == user_msg[1].ToUpper());
+
+            if (found_teach != null)
+            {
+                SettingsVk temp = new SettingsVk()
+                {
+                    IdTask = settings.SettingsVkList.Count + 1,
+                    TypeTask = 'T',
+                    Value = found_teach.id,
+                    PeerId = groupupdate.Message.PeerId.ToString()
+                };
+
+                WriteWaring($"Задача #{temp.IdTask} была добавлена. Тип - преподаватель. Значение - #{temp.Value}. Беседа #{temp.PeerId}");
+                settings.SettingsVkList.Add(temp);
+                settings.SaveSettings();
+
+                return $"Расписание для {found_teach.name} привязано к беседе";
+            }
+
+            if (found_group != null)
+            {
+                SettingsVk temp = new SettingsVk()
+                {
+                    IdTask = settings.SettingsVkList.Count + 1,
+                    TypeTask = 'G',
+                    Value = found_group.id.ToString(),
+                    PeerId = groupupdate.Message.PeerId.ToString()
+                };
+
+                WriteWaring($"Задача #{temp.IdTask} была добавлена. Тип - преподаватель. Значение - #{temp.Value}. Беседа #{temp.PeerId}");
+                settings.SettingsVkList.Add(temp);
+                settings.SaveSettings();
+                return $"Расписание для {found_group.name} привязано к беседе";
+            }
+
+            return "Ошибка при поиске групп и преподавателей";
+        }
+        // Удаление задачи
         public string DeleteTask(GroupUpdate groupupdate, string[] user_msg)
         {
             var find = settings.SettingsVkList.FirstOrDefault(x => x.PeerId == groupupdate.Message.PeerId.ToString());
@@ -75,6 +136,198 @@ namespace RaspSGkVk2.Models
 
             return $"Ошибка при удаление задачи. Смотри консоль";
         }
+
+
+        // АДМИНИСТРИРОВАНИЕ
+        // Добавление нового админа
+        public string AddNewAdmin(GroupUpdate groupupdate, string[] user_msg)
+        {
+
+            if (isAdmin(groupupdate, user_msg))
+                return "Нет прав";
+
+            ListAdmins admin = new ListAdmins()
+            {
+                Id = settings.AdminsList.Count + 1,
+                Value = user_msg[1]
+            };
+
+            settings.AdminsList.Add(admin);
+            settings.SaveSettings();
+            WriteWaring($"Внесены изменения в список администраторов #{admin.Id} -> #{admin.Value}");
+
+            return $"{user_msg[1]} добавлен в администраторы";
+
+        }
+        // Массовая рассылка
+        public string SendAllResponse(GroupUpdate groupupdate, string[] user_msg)
+        {
+            if (isAdmin(groupupdate, user_msg))
+                return "Нет прав";
+
+            string command = "";
+            foreach (var item in user_msg)
+            {
+                if (item != "!рассылка")
+                    command += $" {item}";
+            }
+
+            command = command.Remove(0, 1);
+
+            WriteWaring($"Пользователь {groupupdate.Message.FromId} иниициировал рассылку c текстом: {command}");
+            SendAll(command);
+
+            return $"Рассылка выполнена";
+
+        }
+        // Вывод всех задач
+        public string GetTasks(GroupUpdate groupupdate, string[] user_msg)
+        {
+            if (isAdmin(groupupdate, user_msg))
+                return "Нет прав";
+
+            string text = "Активные задачи\n";
+
+            foreach (var item in settings.SettingsVkList)
+            {
+                text += $"#{item.IdTask}. Peer #{item.PeerId}. Value {item.Value}";
+            }
+
+            return text;
+
+
+        }
+        //Удаление задач
+        public string DeleteTaskAdmin(GroupUpdate groupupdate, string[] user_msg)
+        {
+            if (isAdmin(groupupdate, user_msg))
+                return "Нет прав";
+
+            var findtask = settings.SettingsVkList.FirstOrDefault(x => x.IdTask.ToString() == user_msg[1]);
+            if (findtask != null)
+            {
+                settings.SettingsVkList.Remove(findtask);
+                settings.SaveSettings();
+                return $"Задача #{findtask.IdTask} для беседы #{findtask.PeerId} удалена";
+            }
+            else
+            {
+                return $"Ошибка при удалении";
+            }
+
+        }
+
+
+
+        public bool isAdmin(GroupUpdate groupupdate, string[] user_msg)
+        {
+            var id_sender = groupupdate.Message.FromId;
+
+            var find = settings.AdminsList.FirstOrDefault(x => x.Value == id_sender.Value.ToString());
+
+            if (find == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+
+        // Развлечение
+        // Пополнение словаря
+        public string AddNewBook(GroupUpdate groupupdate, string[] user_msg)
+        {
+
+            string text = "";
+            foreach (var item in user_msg)
+            {
+                if (item != "!словарь")
+                    text += $"{item} ";
+            }
+
+            var new_text = text.ToLower().Split("!");
+
+            var find = settings.Books.FirstOrDefault(x => x.Word == new_text[0]);
+            if (find != null)
+                return $"Ошибка при занесение данных в словарь. Слово уже существует. Используйте !редсловарь";
+
+            Book book = new Book()
+            {
+                Id = settings.Books.Count + 1,
+                Word = new_text[0],
+                Value = new_text[1]
+            };
+
+            settings.Books.Add(book);
+            settings.SaveSettings();
+
+            WriteWaring($"Внесены изменения в словарь. #{book.Id} -> {book.Word} => {book.Value}");
+
+            return $"Словарь изменен";
+        }
+        // Редактирование словаря
+        public string EditBook(GroupUpdate groupupdate, string[] user_msg)
+        {
+
+            string text = "";
+            foreach (var item in user_msg)
+            {
+                if (item != "!редсловарь")
+                    text += $"{item} ";
+            }
+
+            var new_text = text.ToLower().Split("!");
+
+            var find = settings.Books.FirstOrDefault(x => x.Word == new_text[0]);
+            if (find == null)
+                return $"Ошибка при изменений в словарь. Слово не найдено! - Используйте !словарь";
+
+            find.Word = new_text[0];
+            find.Value = new_text[1];
+
+            settings.SaveSettings();
+
+            WriteWaring($"Внесены изменения в словарь. #{find.Id} -> {find.Word} => {find.Value}");
+
+            return $"Словарь изменен";
+        }
+        // Показ словаря
+        public string CheckBook(GroupUpdate groupupdate, string[] user_msg)
+        {
+
+            string text = "";
+            foreach (var item in user_msg)
+            {
+                if (item != "!слово")
+                    text += $"{item} ";
+            }
+
+            var new_text = text.ToLower().Split("!");
+
+            text = text.TrimEnd(' ');
+
+            var find = settings.Books.FirstOrDefault(x => x.Word == text);
+            if (find == null)
+                return $"Слово не найдено в словаре";
+
+            string msg = $"На слово '{find.Word}' могу отвечать: ";
+
+            var answer = find.Value.Split(";");
+
+            foreach (var item in answer)
+            {
+                msg += $"{item}/";
+            }
+
+            return msg;
+        }
+
+
+
+
 
         //Ответы из словаря, случайные ответы
         public string GetAnswer(GroupUpdate groupupdate, string[] user_msg)
@@ -108,201 +361,6 @@ namespace RaspSGkVk2.Models
 
         }
 
-        //Редактирование словаря
-        public string CheckBook(GroupUpdate groupupdate, string[] user_msg)
-        {
-
-            string text = "";
-            foreach (var item in user_msg)
-            {
-                if (item != "!слово")
-                    text += $"{item} ";
-            }
-
-            var new_text = text.ToLower().Split("!");
-
-            text = text.TrimEnd(' ');
-
-            var find = settings.Books.FirstOrDefault(x => x.Word == text);
-            if (find == null)
-                return $"Слово не найдено в словаре";
-
-            string msg = $"На слово '{find.Word}' могу отвечать: ";
-
-            var answer = find.Value.Split(";");
-
-            foreach (var item in answer)
-            {
-                msg += $"{item}/";
-            }
-
-            return msg;
-        }
-
-        //Редактирование словаря
-        public string EditBook(GroupUpdate groupupdate, string[] user_msg)
-        {
-
-            string text = "";
-            foreach (var item in user_msg)
-            {
-                if (item != "!редсловарь")
-                    text += $"{item} ";
-            }
-
-            var new_text = text.ToLower().Split("!");
-
-            var find = settings.Books.FirstOrDefault(x => x.Word == new_text[0]);
-            if (find == null)
-                return $"Ошибка при изменений в словарь. Слово не найдено! - Используйте !словарь";
-
-            find.Word = new_text[0];
-            find.Value = new_text[1];
-
-            settings.SaveSettings();
-
-            WriteWaring($"Внесены изменения в словарь. #{find.Id} -> {find.Word} => {find.Value}");
-
-            return $"Словарь изменен";
-        }
-
-        //Пополнение словаря
-        public string AddNewBook(GroupUpdate groupupdate, string[] user_msg)
-        {
-
-            string text = "";
-            foreach (var item in user_msg)
-            {
-                if(item != "!словарь")
-                    text += $"{item} ";
-            }
-
-            var new_text = text.ToLower().Split("!");
-
-            var find = settings.Books.FirstOrDefault(x => x.Word == new_text[0]);
-            if (find != null)
-                return $"Ошибка при занесение данных в словарь. Слово уже существует. Используйте !редсловарь";
-
-            Book book = new Book()
-            {
-                Id = settings.Books.Count +1,
-                Word = new_text[0],
-                Value = new_text[1]
-            };
-
-            settings.Books.Add(book);
-            settings.SaveSettings();
-
-            WriteWaring($"Внесены изменения в словарь. #{book.Id} -> {book.Word} => {book.Value}");
-
-            return $"Словарь изменен";
-        }
-
-        public string AddNewAdmin(GroupUpdate groupupdate, string[] user_msg)
-        {
-            var id_sender = groupupdate.Message.FromId;
-
-            var find = settings.AdminsList.FirstOrDefault(x => x.Value == id_sender.Value.ToString());
-
-            if (find == null)
-                return $"У вас нет прав на добавление администраторов бота";
-
-            ListAdmins admin = new ListAdmins()
-            {
-                Id = settings.AdminsList.Count + 1,
-                Value =  user_msg[1]           
-            };
-
-            settings.AdminsList.Add(admin);
-            settings.SaveSettings();
-            WriteWaring($"Внесены изменения в список администраторов #{admin.Id} -> #{admin.Value}");
-
-            return $"{user_msg[1]} добавлен в администраторы";
-
-        }
-
-        internal string GetTasks(GroupUpdate groupupdate, string[] user_msg)
-        {
-            var id_sender = groupupdate.Message.FromId;
-
-            var find = settings.AdminsList.FirstOrDefault(x => x.Value == id_sender.Value.ToString());
-
-            if (find == null)
-                return $"Недорос еще";
-
-            string text = "Активные задачи\n";
-
-            foreach (var item in settings.SettingsVkList)
-            {
-                text += $"#{item.IdTask}. Peer #{item.PeerId}. Value {item.Value}";
-            }
-
-            return text;
-
-
-        }
-
-        public string FindAddNewTask(GroupUpdate groupupdate, string[] user_msg)
-        {
-
-            var findpeer = settings.SettingsVkList.FirstOrDefault(x => x.PeerId == groupupdate.Message.PeerId.ToString());
-            if (findpeer != null)
-                return $"Существующая беседа {groupupdate.Message.PeerId} уже привязана к (id #{findpeer.IdTask} / {findpeer.Value}) ";
-            
-            var teachers = GetTeachers();
-            var groups = GetGroup();
-
-
-            string text_teach = "";
-
-            foreach (var item in user_msg)
-            {
-                if(item != "!привязать")
-                    text_teach += $" {item}";
-            }
-
-            text_teach = text_teach.Remove(0, 1);
-
-            var found_teach = teachers.FirstOrDefault(x => x.name.ToLower() == text_teach.ToLower());
-            //var found_teach = teachers.FirstOrDefault(x => x.name.ToLower() == user_msg[1].ToLower());
-
-            var found_group = groups.FirstOrDefault(x => x.name.ToUpper() == user_msg[1].ToUpper());
-            
-            if (found_teach != null)
-            {
-                SettingsVk temp = new SettingsVk()
-                {
-                    IdTask = settings.SettingsVkList.Count + 1,
-                    TypeTask = 'T',
-                    Value = found_teach.id,
-                    PeerId = groupupdate.Message.PeerId.ToString()
-                };
-
-                WriteWaring($"Задача #{temp.IdTask} была добавлена. Тип - преподаватель. Значение - #{temp.Value}. Беседа #{temp.PeerId}");
-                settings.SettingsVkList.Add(temp);
-                settings.SaveSettings();
-
-                return $"Расписание для {found_teach.name} привязано к беседе";
-            }
-
-            if(found_group != null)
-            {
-                SettingsVk temp = new SettingsVk()
-                {
-                    IdTask = settings.SettingsVkList.Count + 1,
-                    TypeTask = 'G',
-                    Value = found_group.id.ToString(),
-                    PeerId = groupupdate.Message.PeerId.ToString()
-                };
-
-                WriteWaring($"Задача #{temp.IdTask} была добавлена. Тип - преподаватель. Значение - #{temp.Value}. Беседа #{temp.PeerId}");
-                settings.SettingsVkList.Add(temp);
-                settings.SaveSettings();
-                return $"Расписание для {found_group.name} привязано к беседе";
-            }
-
-            return "Ошибка при поиске групп и преподавателей";
-        }
 
         /// <summary>
         /// Получение списка групп
@@ -432,23 +490,6 @@ namespace RaspSGkVk2.Models
             }
         }
 
-        public string SendAllResponse(GroupUpdate groupupdate, string[] user_msg)
-        {
-            string command = "";
-            foreach (var item in user_msg)
-            {
-                if (item != "!рассылка")
-                    command += $" {item}";
-            }
-
-            command = command.Remove(0, 1);
-
-            WriteWaring($"Пользователь {groupupdate.Message.FromId} иниициировал рассылку c текстом: {command}");
-            SendAll(command);
-
-            return $"Рассылка выполнена";
-
-        }
 
         //Рассылка всем!
         public void SendAll(string text)
