@@ -108,6 +108,64 @@ namespace RaspSGkVk2.Models
 
         }
 
+        //Редактирование словаря
+        public string CheckBook(GroupUpdate groupupdate, string[] user_msg)
+        {
+
+            string text = "";
+            foreach (var item in user_msg)
+            {
+                if (item != "!слово")
+                    text += $"{item} ";
+            }
+
+            var new_text = text.ToLower().Split("!");
+
+            text = text.TrimEnd(' ');
+
+            var find = settings.Books.FirstOrDefault(x => x.Word == text);
+            if (find == null)
+                return $"Слово не найдено в словаре";
+
+            string msg = $"На слово '{find.Word}' могу отвечать: ";
+
+            var answer = find.Value.Split(";");
+
+            foreach (var item in answer)
+            {
+                msg += $"{item}/";
+            }
+
+            return msg;
+        }
+
+        //Редактирование словаря
+        public string EditBook(GroupUpdate groupupdate, string[] user_msg)
+        {
+
+            string text = "";
+            foreach (var item in user_msg)
+            {
+                if (item != "!редсловарь")
+                    text += $"{item} ";
+            }
+
+            var new_text = text.ToLower().Split("!");
+
+            var find = settings.Books.FirstOrDefault(x => x.Word == new_text[0]);
+            if (find == null)
+                return $"Ошибка при изменений в словарь. Слово не найдено! - Используйте !словарь";
+
+            find.Word = new_text[0];
+            find.Value = new_text[1];
+
+            settings.SaveSettings();
+
+            WriteWaring($"Внесены изменения в словарь. #{find.Id} -> {find.Word} => {find.Value}");
+
+            return $"Словарь изменен";
+        }
+
         //Пополнение словаря
         public string AddNewBook(GroupUpdate groupupdate, string[] user_msg)
         {
@@ -120,6 +178,10 @@ namespace RaspSGkVk2.Models
             }
 
             var new_text = text.ToLower().Split("!");
+
+            var find = settings.Books.FirstOrDefault(x => x.Word == new_text[0]);
+            if (find != null)
+                return $"Ошибка при занесение данных в словарь. Слово уже существует. Используйте !редсловарь";
 
             Book book = new Book()
             {
@@ -135,8 +197,6 @@ namespace RaspSGkVk2.Models
 
             return $"Словарь изменен";
         }
-
-
 
         public string AddNewAdmin(GroupUpdate groupupdate, string[] user_msg)
         {
@@ -161,6 +221,26 @@ namespace RaspSGkVk2.Models
 
         }
 
+        internal string GetTasks(GroupUpdate groupupdate, string[] user_msg)
+        {
+            var id_sender = groupupdate.Message.FromId;
+
+            var find = settings.AdminsList.FirstOrDefault(x => x.Value == id_sender.Value.ToString());
+
+            if (find == null)
+                return $"Недорос еще";
+
+            string text = "Активные задачи\n";
+
+            foreach (var item in settings.SettingsVkList)
+            {
+                text += $"#{item.IdTask}. Peer #{item.PeerId}. Value {item.Value}";
+            }
+
+            return text;
+
+
+        }
 
         public string FindAddNewTask(GroupUpdate groupupdate, string[] user_msg)
         {
@@ -177,7 +257,7 @@ namespace RaspSGkVk2.Models
 
             foreach (var item in user_msg)
             {
-                if(item != "!доб")
+                if(item != "!привязать")
                     text_teach += $" {item}";
             }
 

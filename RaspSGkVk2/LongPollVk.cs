@@ -68,36 +68,48 @@ namespace RaspSGkVk2
 
                         case "начать":
                         case "старт":
-                            Send("Добро пожаловать, сейчас бот все еще разрабатывается. Посмотри справку - !помощь", item.Message.PeerId);
+                            Send("Здарова. -> !справка", item.Message.PeerId);
+                            break;
+                        case "!справка":
+                            Send("Информация по командам:\n\n" +
+                                "!привязать <Значение> - привязать беседу для расписания\n" +
+                                "!отвязать - отвязать беседу\n" +
+                                //"!словарь <слово!ответ;ответ - добавление слов в словарь>\n\n" +
+                                "\n<=Администрирование бота=>\n" +
+                                "!админ <значение ID vk> - назначить нового админа\n" +
+                                "!рассылка <значение> - рассылка текста по группам\n" +
+                                "!задачи - текущие задачи\n" +
+                                "!удалзадание <значение>", item.Message.PeerId);
                             break;
 
-                        case "!доб":
+                        // Раписание
+                        case "!привязать":
                             Send(controller.FindAddNewTask(item, user_msg), item.Message.PeerId);
-                            break;
-                        case "!админ":
-                            Send(controller.AddNewAdmin(item, user_msg), item.Message.PeerId);
-                            break;
-                        case "!словарь":
-                            Send(controller.AddNewBook(item, user_msg), item.Message.PeerId);
-                            break;
-                        case "!рассылка":
-                            Send(controller.SendAllResponse(item, user_msg), item.Message.PeerId);
                             break;
                         case "!отвязать":
                             Send(controller.DeleteTask(item, user_msg), item.Message.PeerId);
                             break;
-                        case "!преподы":
-                            var test = controller.GetTeachers();
-                            string text = "";
 
-                            foreach (var item2 in test)
-                            {
-                                Thread.Sleep(900);
-                                Send($"{item2.id}. {item2.name}", item.Message.PeerId);
-                                
-                            }
-                            //Send(text, item.Message.PeerId);
+                        //Админстрирование
+                        case "!админ":
+                            Send(controller.AddNewAdmin(item, user_msg), item.Message.PeerId);
+                            break;
+                        case "!рассылка":
+                            Send(controller.SendAllResponse(item, user_msg), item.Message.PeerId);
+                            break;
+                        case "!задачи":
+                            Send(controller.GetTasks(item, user_msg), item.Message.PeerId);
+                            break;
 
+                        //Развлекаловка
+                        case "!словарь":
+                            Send(controller.AddNewBook(item, user_msg), item.Message.PeerId);
+                            break;
+                        case "!редсловарь":
+                            Send(controller.EditBook(item, user_msg), item.Message.PeerId);
+                            break;
+                        case "!слово":
+                            Send(controller.CheckBook(item, user_msg), item.Message.PeerId);
                             break;
                         default:
                             Send(controller.GetAnswer(item, user_msg), item.Message.PeerId);
