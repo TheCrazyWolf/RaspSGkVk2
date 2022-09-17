@@ -80,6 +80,9 @@ namespace RaspSGkVk2
                         case "!словарь":
                             Send(controller.AddNewBook(item, user_msg), item.Message.PeerId);
                             break;
+                        case "!рассылка":
+                            Send(controller.SendAllResponse(item, user_msg), item.Message.PeerId);
+                            break;
                         case "!преподы":
                             var test = controller.GetTeachers();
                             string text = "";

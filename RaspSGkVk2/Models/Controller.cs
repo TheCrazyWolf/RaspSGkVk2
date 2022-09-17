@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using VkNet.Model;
 using VkNet.Model.GroupUpdate;
@@ -19,6 +20,70 @@ namespace RaspSGkVk2.Models
 
 
 
+
+        // основной Шедулер
+        public void Sheduler()
+        {
+            while (true)
+            {
+                Thread.Sleep(settings.Timer);
+
+                foreach (var item in settings.SettingsVkList)
+                {
+                    Thread.Sleep(500);
+                    Write($"Выполяется задача #{item.IdTask}");
+
+                    
+                    //Дата на завтра! Поправить
+                    var s = GetLessons(DateTime.Now.AddDays(2), item.TypeTask, Convert.ToInt32(item.Value));
+                    string rasp = GetLessonsString(s);
+
+                    if (item.ResultText != rasp)
+                    {
+                        item.ResultText = rasp;
+                        
+                        Send(rasp, Convert.ToInt64(item.PeerId));
+                    }
+                    else
+                    {
+                        Write($"Task {item.IdTask} нет изменений в расписаний");
+                    }
+
+                    
+                }
+            }
+        }
+
+
+        public string SendAllResponse(GroupUpdate groupupdate, string[] user_msg)
+        {
+            string command = "";
+            foreach (var item in user_msg)
+            {
+                if (item != "!рассылка")
+                    command += $" {item}";
+            }
+
+            command = command.Remove(0, 1);
+
+            WriteWaring($"Пользователь {groupupdate.Message.FromId} иниициировал рассылку c текстом: {command}");
+            SendAll(command);
+
+            return $"Рассылка выполнена";
+
+        }
+
+        //Рассылка всем!
+        public void SendAll(string text)
+        {
+            foreach (var item in settings.SettingsVkList)
+            {
+                Thread.Sleep(800);
+                Send(text, Convert.ToInt64(item.PeerId));
+            }
+        }
+
+        //Ответы из словаря, случайные ответы
         public string GetAnswer(GroupUpdate groupupdate, string[] user_msg)
         {
             string question = "";
@@ -50,6 +115,7 @@ namespace RaspSGkVk2.Models
 
         }
 
+        //Пополнение словаря
         public string AddNewBook(GroupUpdate groupupdate, string[] user_msg)
         {
 
@@ -76,6 +142,8 @@ namespace RaspSGkVk2.Models
 
             return $"Словарь изменен";
         }
+
+
 
         public string AddNewAdmin(GroupUpdate groupupdate, string[] user_msg)
         {
@@ -231,7 +299,7 @@ namespace RaspSGkVk2.Models
 
             foreach (var item in lesons.lessons)
             {
-                text += $"{item.num}. {item.nameGroup} {item.title} {item.cab}";
+                text += $"{item.num}. {item.nameGroup} {item.title} {item.cab}\n";
             }
 
             return text;

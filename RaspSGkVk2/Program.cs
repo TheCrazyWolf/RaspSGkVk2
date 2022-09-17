@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RaspSGkVk2.Models;
+using System;
 using System.Threading.Tasks;
 using VkNet;
 using VkNet.Model;
@@ -33,6 +34,10 @@ namespace RaspSGkVk2
             //lpoll.StartLongPoll();
 
             Task.Run(()=> lpoll.StartLongPoll());
+
+            Controller controller = new Controller();
+            Task.Run(() => controller.Sheduler());
+
             Console.ReadLine();
 
         }

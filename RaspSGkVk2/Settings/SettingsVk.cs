@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RaspSGkVk2.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,12 @@ namespace RaspSGkVk2
         public int IdTask { get; set; }
         public char TypeTask { get; set; }
         public string Value { get; set; }
-
         public string PeerId { get; set; }
+
+        [NonSerialized]
+        public RaspApi Result;
+        [NonSerialized]
+        public string ResultText;
+
     }
 }

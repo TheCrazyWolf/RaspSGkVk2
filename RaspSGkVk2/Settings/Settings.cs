@@ -69,6 +69,35 @@ namespace RaspSGkVk2
 
                 Console.Write("Таймер в милисекундах(для АСУ СГК): ");
                 Timer = Convert.ToInt32(Console.ReadLine());
+
+                Console.Write("Номер Администратора бота (VK ID): ");
+                string idadmin = Console.ReadLine();
+
+                ListAdmins admin = new ListAdmins()
+                {
+                    Id = AdminsList.Count + 1,
+                    Value = idadmin
+                };
+
+                AdminsList.Add(admin);
+
+                Book book = new Book()
+                {
+                    Id = Books.Count + 1,
+                    Word = "привет",
+                    Value = "здарова карова;здарова;хаю-хай;шалом;эм"
+                };
+
+                Book book2 = new Book()
+                {
+                    Id = Books.Count + 1,
+                    Word = "как дела",
+                    Value = "норм;нормас;в целом все как обычно через жопу;херово;ну такое;ага;как же хочется пиццы;нет слов;ты кто"
+                };
+
+                Books.Add(book);
+                Books.Add(book2);
+
                 SaveSettings();
             }
             catch (Exception ex)
