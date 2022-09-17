@@ -18,7 +18,15 @@ namespace RaspSGkVk2
         {
             
             settings = settings.LoadSettings();
-            
+
+            //ListAdmins admin = new ListAdmins()
+            //{
+            //    Id = settings.AdminsList.Count + 1,
+            //    Value = "133156422"
+            //};
+
+            //settings.AdminsList.Add(admin);
+            //settings.SaveSettings();
 
             Auth();
 

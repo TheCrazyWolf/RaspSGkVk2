@@ -12,6 +12,6 @@ namespace RaspSGkVk2
         // Инкримент
         public int Id { get; set; }
         //Id Пользователя
-        public long Value { get; set; }
+        public string Value { get; set; }
     }
 }

@@ -72,17 +72,14 @@ namespace RaspSGkVk2
                             break;
 
                         case "!доб":
-                            var result = controller.FindAddNewTask(user_msg[1], item.Message.PeerId.ToString());
-                            if (result != "")
-                            {
-                                Send($"{result} добавлена в настройки", item.Message.PeerId);
-                            }
-                            else
-                            {
-                                Send($"Группа или преподаватель не найдены", item.Message.PeerId);
-                            }
+                            Send(controller.FindAddNewTask(item, user_msg), item.Message.PeerId);
                             break;
-
+                        case "!админ":
+                            Send(controller.AddNewAdmin(item, user_msg), item.Message.PeerId);
+                            break;
+                        case "!словарь":
+                            Send(controller.AddNewBook(item, user_msg), item.Message.PeerId);
+                            break;
                         case "!преподы":
                             var test = controller.GetTeachers();
                             string text = "";
@@ -97,30 +94,9 @@ namespace RaspSGkVk2
 
                             break;
                         default:
+                            Send(controller.GetAnswer(item, user_msg), item.Message.PeerId);
                             break;
                     }
-
-
-                    //if (user_msg[0] == "начать")
-                    //{
-                    //    Send("Добро пожаловать, сейчас бот все еще разрабатывается. Посмотри справку - !помощь", item.Message.PeerId);
-                    //}
-                    //else if (user_msg[0] == "!помощь")
-                    //{
-                    //    Send("ОК!", item.Message.PeerId);
-                    //}
-                    //else if (user_msg[0] == "!админ")
-                    //{
-                    //    if (item.Message.FromId != 133156422)
-                    //    {
-                    //        Send("ОК!", item.Message.PeerId);
-                    //    }
-                    //    else
-                    //    {
-                    //        Send("ОК!", item.Message.PeerId);
-                    //    }
-
-                    //}
 
 
                 }
