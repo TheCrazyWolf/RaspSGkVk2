@@ -33,7 +33,7 @@ namespace RaspSGkVk2.Models
 
 
                         //Дата на завтра! Поправить (ТОЛЬКО 1 день)
-                        var s = GetLessons(DateTime.Now.AddDays(2), item.TypeTask, Convert.ToInt32(item.Value));
+                        var s = GetLessons(DateTime.Now.AddDays(1), item.TypeTask, Convert.ToInt32(item.Value));
                         string rasp = GetLessonsString(s);
 
                         if (item.ResultText != rasp)
@@ -121,6 +121,7 @@ namespace RaspSGkVk2.Models
 
             return "Ошибка при поиске групп и преподавателей";
         }
+
         // Удаление задачи
         public string DeleteTask(GroupUpdate groupupdate, string[] user_msg)
         {
@@ -135,6 +136,25 @@ namespace RaspSGkVk2.Models
             }
 
             return $"Ошибка при удаление задачи. Смотри консоль";
+        }
+        //Получить расписание вчер, сегодня и на завтра
+        public string GetLessonsNow(GroupUpdate groupupdate, string[] user_msg)
+        {
+            var find = settings.SettingsVkList.FirstOrDefault(x => x.PeerId == groupupdate.Message.PeerId.ToString());
+            if (find != null)
+            {
+                var lessons_tommor = GetLessons(DateTime.Now.AddDays(-1), find.TypeTask, Convert.ToInt32(find.Value));
+                var lessons_today = GetLessons(DateTime.Now, find.TypeTask, Convert.ToInt32(find.Value));
+                var lessons_nextday = GetLessons(DateTime.Now.AddDays(1), find.TypeTask, Convert.ToInt32(find.Value));
+
+                var text_tommor = GetLessonsString(lessons_tommor);
+                var text_today = GetLessonsString(lessons_today);
+                var text_nextday = GetLessonsString(lessons_nextday);
+
+                return $"{text_tommor}\n{text_today}\n{text_nextday}";
+
+            }
+            return $"К этой беседе не привязано ни одно расписание :(";
         }
 
 
@@ -216,7 +236,16 @@ namespace RaspSGkVk2.Models
             }
 
         }
-        
+        //Рассылка всем!
+        public void SendAll(string text)
+        {
+            foreach (var item in settings.SettingsVkList)
+            {
+                Thread.Sleep(800);
+                Send(text, Convert.ToInt64(item.PeerId));
+            }
+        }
+
 
 
 
@@ -326,7 +355,6 @@ namespace RaspSGkVk2.Models
 
             return msg;
         }
-
         //Ответы из словаря, случайные ответы
         public string GetAnswer(GroupUpdate groupupdate, string[] user_msg)
         {
@@ -489,14 +517,5 @@ namespace RaspSGkVk2.Models
         }
 
 
-        //Рассылка всем!
-        public void SendAll(string text)
-        {
-            foreach (var item in settings.SettingsVkList)
-            {
-                Thread.Sleep(800);
-                Send(text, Convert.ToInt64(item.PeerId));
-            }
-        }
     }
 }

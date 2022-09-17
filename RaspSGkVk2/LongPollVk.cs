@@ -83,6 +83,9 @@ namespace RaspSGkVk2
                             break;
 
                         // Раписание
+                        case "!расписание":
+                            Send(controller.GetLessonsNow(item, user_msg), item.Message.PeerId);
+                            break;
                         case "!привязать":
                             Send(controller.FindAddNewTask(item, user_msg), item.Message.PeerId);
                             break;
