@@ -83,6 +83,9 @@ namespace RaspSGkVk2
                         case "!рассылка":
                             Send(controller.SendAllResponse(item, user_msg), item.Message.PeerId);
                             break;
+                        case "!отвязать":
+                            Send(controller.DeleteTask(item, user_msg), item.Message.PeerId);
+                            break;
                         case "!преподы":
                             var test = controller.GetTeachers();
                             string text = "";

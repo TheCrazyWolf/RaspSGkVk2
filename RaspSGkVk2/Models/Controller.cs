@@ -28,59 +28,52 @@ namespace RaspSGkVk2.Models
             {
                 Thread.Sleep(settings.Timer);
 
-                foreach (var item in settings.SettingsVkList)
+                try
                 {
-                    Thread.Sleep(500);
-                    Write($"Выполяется задача #{item.IdTask}");
-
-                    
-                    //Дата на завтра! Поправить
-                    var s = GetLessons(DateTime.Now.AddDays(2), item.TypeTask, Convert.ToInt32(item.Value));
-                    string rasp = GetLessonsString(s);
-
-                    if (item.ResultText != rasp)
+                    foreach (var item in settings.SettingsVkList)
                     {
-                        item.ResultText = rasp;
-                        
-                        Send(rasp, Convert.ToInt64(item.PeerId));
-                    }
-                    else
-                    {
-                        Write($"Task {item.IdTask} нет изменений в расписаний");
-                    }
+                        Thread.Sleep(500);
+                        Write($"Выполяется задача #{item.IdTask}");
 
-                    
+
+                        //Дата на завтра! Поправить (ТОЛЬКО 1 день)
+                        var s = GetLessons(DateTime.Now.AddDays(2), item.TypeTask, Convert.ToInt32(item.Value));
+                        string rasp = GetLessonsString(s);
+
+                        if (item.ResultText != rasp)
+                        {
+                            item.ResultText = rasp;
+
+                            Send(rasp, Convert.ToInt64(item.PeerId));
+                        }
+                        else
+                        {
+                            Write($"Task {item.IdTask} нет изменений в расписаний");
+                        }
+
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WriteError(ex.ToString());
                 }
             }
         }
 
-
-        public string SendAllResponse(GroupUpdate groupupdate, string[] user_msg)
+        public string DeleteTask(GroupUpdate groupupdate, string[] user_msg)
         {
-            string command = "";
-            foreach (var item in user_msg)
+            var find = settings.SettingsVkList.FirstOrDefault(x => x.PeerId == groupupdate.Message.PeerId.ToString());
+
+            if (find != null)
             {
-                if (item != "!рассылка")
-                    command += $" {item}";
+                settings.SettingsVkList.Remove(find);
+                WriteWaring("Внесены изменения в список задач");
+                settings.SaveSettings();
+                return $"Задача #{find.IdTask} была отменена для беседы #{groupupdate.Message.PeerId}";
             }
 
-            command = command.Remove(0, 1);
-
-            WriteWaring($"Пользователь {groupupdate.Message.FromId} иниициировал рассылку c текстом: {command}");
-            SendAll(command);
-
-            return $"Рассылка выполнена";
-
-        }
-
-        //Рассылка всем!
-        public void SendAll(string text)
-        {
-            foreach (var item in settings.SettingsVkList)
-            {
-                Thread.Sleep(800);
-                Send(text, Convert.ToInt64(item.PeerId));
-            }
+            return $"Ошибка при удаление задачи. Смотри консоль";
         }
 
         //Ответы из словаря, случайные ответы
@@ -171,6 +164,11 @@ namespace RaspSGkVk2.Models
 
         public string FindAddNewTask(GroupUpdate groupupdate, string[] user_msg)
         {
+
+            var findpeer = settings.SettingsVkList.FirstOrDefault(x => x.PeerId == groupupdate.Message.PeerId.ToString());
+            if (findpeer != null)
+                return $"Существующая беседа {groupupdate.Message.PeerId} уже привязана к (id #{findpeer.IdTask} / {findpeer.Value}) ";
+            
             var teachers = GetTeachers();
             var groups = GetGroup();
 
@@ -189,7 +187,7 @@ namespace RaspSGkVk2.Models
             //var found_teach = teachers.FirstOrDefault(x => x.name.ToLower() == user_msg[1].ToLower());
 
             var found_group = groups.FirstOrDefault(x => x.name.ToUpper() == user_msg[1].ToUpper());
-
+            
             if (found_teach != null)
             {
                 SettingsVk temp = new SettingsVk()
@@ -351,6 +349,34 @@ namespace RaspSGkVk2.Models
             catch (Exception ex)
             {
                 WriteError(ex.ToString());
+            }
+        }
+
+        public string SendAllResponse(GroupUpdate groupupdate, string[] user_msg)
+        {
+            string command = "";
+            foreach (var item in user_msg)
+            {
+                if (item != "!рассылка")
+                    command += $" {item}";
+            }
+
+            command = command.Remove(0, 1);
+
+            WriteWaring($"Пользователь {groupupdate.Message.FromId} иниициировал рассылку c текстом: {command}");
+            SendAll(command);
+
+            return $"Рассылка выполнена";
+
+        }
+
+        //Рассылка всем!
+        public void SendAll(string text)
+        {
+            foreach (var item in settings.SettingsVkList)
+            {
+                Thread.Sleep(800);
+                Send(text, Convert.ToInt64(item.PeerId));
             }
         }
     }
