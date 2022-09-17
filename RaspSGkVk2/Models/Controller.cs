@@ -499,7 +499,8 @@ namespace RaspSGkVk2.Models
         /// <param name="peerid"></param>
         public void Send(string text, long? peerid)
         {
-            Write($"[MessageSend] -> Беседа #{peerid}. Содержимое: {text}");
+            Write($"[MessageSend] -> Беседа #{peerid}.");
+            //Write($"[MessageSend] -> Беседа #{peerid}. Содержимое: {text}");
             try
             {
                 api.Messages.Send(new MessagesSendParams()

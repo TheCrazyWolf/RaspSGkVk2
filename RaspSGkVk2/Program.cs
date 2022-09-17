@@ -35,7 +35,7 @@ namespace RaspSGkVk2
 
         }
 
-
+        // Авторизация по VK API
         static void Auth()
         {
 

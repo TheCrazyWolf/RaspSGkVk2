@@ -26,7 +26,7 @@ namespace RaspSGkVk2
         //База слов
         public List<Book> Books { get; set; }
 
-
+        // Конструктор
         public Settings()
         {
             SettingsVkList = new List<SettingsVk>();
@@ -116,34 +116,6 @@ namespace RaspSGkVk2
             File.WriteAllText("settings.json",json);
         }
 
-        /// <summary>
-        /// Добавление нвых настроек
-        /// </summary>
-        /// <param name="typeTask"></param>
-        /// <param name="value"></param>
-        /// <param name="peerId"></param>
-        public void AddNewTask(char typeTask, string value, string peerId)
-        {
-            SettingsVk temp = new SettingsVk()
-            {
-                IdTask = SettingsVkList.Count + 1,
-                TypeTask = typeTask,
-                Value = value,
-                PeerId = peerId
-            };
-
-            SettingsVkList.Add(temp);
-        }
-
-        /// <summary>
-        ///Удаление существуюших настроек
-        /// </summary>
-        /// <param name="id"></param>
-        public void DelTask(int id)
-        {
-            var temp = SettingsVkList.FirstOrDefault(x => x.IdTask == id);
-            SettingsVkList.Remove(temp);
-        }
 
     }
 
