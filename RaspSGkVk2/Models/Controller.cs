@@ -24,38 +24,29 @@ namespace RaspSGkVk2.Models
             {
                 Thread.Sleep(settings.Timer);
 
-                if (DateTime.Now.Hour >= 22 && DateTime.Now.Hour <= 9)
+                if (DateTime.Now.Hour >= 22 && DateTime.Now.Hour <= 8)
                     continue;
 
-                try
-                {
                     foreach (var item in settings.SettingsVkList)
                     {
                         Thread.Sleep(500);
                         Write($"Выполяется задача #{item.IdTask}");
 
-                        var s = GetLessons(DateTime.Now.AddDays(1), item.TypeTask, Convert.ToInt32(item.Value));
+                        var s = GetLessons(DateTime.Now.AddDays(4), item.TypeTask, Convert.ToInt32(item.Value));
                         string rasp = GetLessonsString(s);
 
-                        if (item.ResultText != rasp)
-                        {
-                            item.ResultText = rasp;
-                            item.Result = s;
+                        if(item.ResultText == rasp)
+                            continue;
 
-                            Send(rasp, Convert.ToInt64(item.PeerId));
-                        }
-                        else
-                        {
-                            Write($"Task {item.IdTask} нет изменений в расписаний");
-                        }
+                        if (s.lessons.Count == 0)
+                            continue;
 
+                        item.ResultText = rasp;
+                        item.Result = s;
+
+                        Send(rasp, Convert.ToInt64(item.PeerId));
 
                     }
-                }
-                catch (Exception ex)
-                {
-                    WriteError(ex.ToString());
-                }
             }
         }
 
