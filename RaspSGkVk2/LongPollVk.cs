@@ -86,7 +86,8 @@ namespace RaspSGkVk2
                                 "!админ <значение ID vk> - назначить нового админа\n" +
                                 "!рассылка <значение> - рассылка текста по группам\n" +
                                 "!задачи - текущие задачи\n" +
-                                "!удалзадачи <значение>", item.Message.PeerId);
+                                "!удалзадачи <значение>\n" +
+                                "!конфиг - перезагрузить конфигурацию", item.Message.PeerId);
                             break;
 
                         // Раписание
@@ -112,6 +113,9 @@ namespace RaspSGkVk2
                             break;
                         case "!удалзадачи":
                             Send(controller.DeleteTaskAdmin(item, user_msg), item.Message.PeerId);
+                            break;
+                        case "!конфиг":
+                            Send(controller.ReloadConfig(item, user_msg), item.Message.PeerId);
                             break;
 
                         //Развлекаловка

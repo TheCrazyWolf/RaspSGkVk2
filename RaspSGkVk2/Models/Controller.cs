@@ -43,6 +43,7 @@ namespace RaspSGkVk2.Models
 
                     item.ResultText = rasp;
                     item.Result = s;
+                    settings.SaveSettings();
 
                     Send(rasp, Convert.ToInt64(item.PeerId));
 
@@ -75,7 +76,7 @@ namespace RaspSGkVk2.Models
 
             text_teach = text_teach.Remove(0, 1);
 
-            var found_teach = teachers.FirstOrDefault(x => x.name.ToLower() == text_teach.ToLower());
+            var found_teach = teachers.FirstOrDefault(x => (x.name.ToLower() == text_teach.ToLower()) || (x.id == text_teach));
             //var found_teach = teachers.FirstOrDefault(x => x.name.ToLower() == user_msg[1].ToLower());
 
             var found_group = groups.FirstOrDefault(x => x.name.ToUpper() == user_msg[1].ToUpper());
@@ -246,6 +247,14 @@ namespace RaspSGkVk2.Models
                 Thread.Sleep(800);
                 Send(text, Convert.ToInt64(item.PeerId));
             }
+        }
+        public string ReloadConfig(GroupUpdate groupupdate, string[] user_msg)
+        {
+            if (!isAdmin(groupupdate, user_msg))
+                return "Нет прав";
+
+            settings.LoadSettings();
+            return $"Конфигурация перезагружена";
         }
 
 
