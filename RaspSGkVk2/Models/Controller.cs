@@ -27,26 +27,27 @@ namespace RaspSGkVk2.Models
                 if (DateTime.Now.Hour >= 22 && DateTime.Now.Hour <= 8)
                     continue;
 
-                    foreach (var item in settings.SettingsVkList)
-                    {
-                        Thread.Sleep(500);
-                        Write($"Выполяется задача #{item.IdTask}");
+                foreach (var item in settings.SettingsVkList)
+                {
+                    Thread.Sleep(500);
+                    Write($"Task #{item.IdTask} выполняется");
 
-                        var s = GetLessons(DateTime.Now.AddDays(4), item.TypeTask, Convert.ToInt32(item.Value));
-                        string rasp = GetLessonsString(s);
+                    var s = GetLessons(DateTime.Now.AddDays(1), item.TypeTask, Convert.ToInt32(item.Value));
+                    string rasp = GetLessonsString(s);
 
-                        if(item.ResultText == rasp)
-                            continue;
+                    if (item.ResultText == rasp)
+                        continue;
 
-                        if (s.lessons.Count == 0)
-                            continue;
+                    if (s.lessons.Count == 0)
+                        continue;
 
-                        item.ResultText = rasp;
-                        item.Result = s;
+                    item.ResultText = rasp;
+                    item.Result = s;
 
-                        Send(rasp, Convert.ToInt64(item.PeerId));
+                    Send(rasp, Convert.ToInt64(item.PeerId));
 
-                    }
+                }
+
             }
         }
 
@@ -133,21 +134,29 @@ namespace RaspSGkVk2.Models
         //Получить расписание вчер, сегодня и на завтра
         public string GetLessonsNow(GroupUpdate groupupdate, string[] user_msg)
         {
+
+            if (user_msg.Length == 1)
+                return $"Не указано расписание за какой период - вчера, сегодня или завтра? - !расписание сегодня";
+
             var find = settings.SettingsVkList.FirstOrDefault(x => x.PeerId == groupupdate.Message.PeerId.ToString());
-            if (find != null)
+
+            switch (user_msg[1])
             {
-                var lessons_tommor = GetLessons(DateTime.Now.AddDays(-1), find.TypeTask, Convert.ToInt32(find.Value));
-                var lessons_today = GetLessons(DateTime.Now, find.TypeTask, Convert.ToInt32(find.Value));
-                var lessons_nextday = GetLessons(DateTime.Now.AddDays(1), find.TypeTask, Convert.ToInt32(find.Value));
-
-                var text_tommor = GetLessonsString(lessons_tommor);
-                var text_today = GetLessonsString(lessons_today);
-                var text_nextday = GetLessonsString(lessons_nextday);
-
-                return $"{text_tommor}\n{text_today}\n{text_nextday}";
-
+                case "сегодня":
+                    var lessons_today = GetLessons(DateTime.Now, find.TypeTask, Convert.ToInt32(find.Value));
+                    var text_today = GetLessonsString(lessons_today);
+                    return $"{text_today}";
+                case "вчера":
+                    var lessons_tommor = GetLessons(DateTime.Now.AddDays(-1), find.TypeTask, Convert.ToInt32(find.Value));
+                    var text_tommor = GetLessonsString(lessons_tommor);
+                    return $"{text_tommor}";
+                case "завтра":
+                    var lessons_nextday = GetLessons(DateTime.Now.AddDays(1), find.TypeTask, Convert.ToInt32(find.Value));
+                    var text_nextday = GetLessonsString(lessons_nextday);
+                    return $"{text_nextday}";
+                default:
+                    return $"К этой беседе не привязано ни одно расписание :(";
             }
-            return $"К этой беседе не привязано ни одно расписание :(";
         }
 
 
@@ -362,7 +371,7 @@ namespace RaspSGkVk2.Models
 
             var find = settings.Books.FirstOrDefault(x => x.Word == question);
 
-            if(find != null)
+            if (find != null)
             {
                 var answer = find.Value.Split(";");
 
@@ -374,7 +383,7 @@ namespace RaspSGkVk2.Models
                 var answerRandom = settings.Books[new Random().Next(0, settings.Books.Count)].Value.Split(";");
 
                 return answerRandom[new Random().Next(0, answerRandom.Length)];
-                
+
             }
 
 
@@ -470,7 +479,7 @@ namespace RaspSGkVk2.Models
         {
             try
             {
-                Write($"[asu.samgk.ru] -> {url}");
+                Write($"[HTTP/JSON] -> {url}");
                 using (var wb = new WebClient())
                 {
                     wb.Headers.Set("Accept", "application/json");
