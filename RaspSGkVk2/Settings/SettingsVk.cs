@@ -15,8 +15,8 @@ namespace RaspSGkVk2
         public string Value { get; set; }
         public string PeerId { get; set; }
 
-        public RaspApi Result;
-        public string ResultText;
+        public RaspApi Result { get; set; } 
+        public string ResultText { get; set; }
 
     }
 }

@@ -24,8 +24,8 @@ namespace RaspSGkVk2.Models
             {
                 Thread.Sleep(settings.Timer);
 
-                if (DateTime.Now.Hour >= 22 && DateTime.Now.Hour <= 8)
-                    continue;
+                //if (DateTime.Now.Hour >= 22 && DateTime.Now.Hour <= 8)
+                //    continue;
 
                 foreach (var item in settings.SettingsVkList)
                 {
