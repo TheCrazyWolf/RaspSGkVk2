@@ -24,16 +24,21 @@ namespace RaspSGkVk2.Models
             {
                 Thread.Sleep(settings.Timer);
 
-                //if (DateTime.Now.Hour >= 22 && DateTime.Now.Hour <= 8)
+                //if (DateTime.Now.Hour >= 23 || DateTime.Now.Hour <= 8)
+                //    Write($"[STOP] Ночное время");
                 //    continue;
 
                 foreach (var item in settings.SettingsVkList)
                 {
                     Thread.Sleep(500);
-                    Write($"Task #{item.IdTask} выполняется");
+                    Write($"[Task #{item.IdTask}] запущен по расписанию");
 
                     var s = GetLessons(DateTime.Now.AddDays(1), item.TypeTask, Convert.ToInt32(item.Value));
                     string rasp = GetLessonsString(s);
+
+
+                    //if (item.Result.lessons == s.lessons)
+                    //     continue;
 
                     if (item.ResultText == rasp)
                         continue;
@@ -42,7 +47,7 @@ namespace RaspSGkVk2.Models
                         continue;
 
                     item.ResultText = rasp;
-                    item.Result = s;
+                    //item.Result = s;
                     settings.SaveSettings();
 
                     Send(rasp, Convert.ToInt64(item.PeerId));
@@ -60,7 +65,7 @@ namespace RaspSGkVk2.Models
 
             var findpeer = settings.SettingsVkList.FirstOrDefault(x => x.PeerId == groupupdate.Message.PeerId.ToString());
             if (findpeer != null)
-                return $"Существующая беседа {groupupdate.Message.PeerId} уже привязана к (id #{findpeer.IdTask} / {findpeer.Value}) ";
+                return $"Существующая беседа #{groupupdate.Message.PeerId} уже привязана к (id #{findpeer.IdTask} / {findpeer.Value}) ";
 
             var teachers = GetTeachers();
             var groups = GetGroup();
@@ -77,8 +82,6 @@ namespace RaspSGkVk2.Models
             text_teach = text_teach.Remove(0, 1);
 
             var found_teach = teachers.FirstOrDefault(x => (x.name.ToLower() == text_teach.ToLower()) || (x.id == text_teach));
-            //var found_teach = teachers.FirstOrDefault(x => x.name.ToLower() == user_msg[1].ToLower());
-
             var found_group = groups.FirstOrDefault(x => x.name.ToUpper() == user_msg[1].ToUpper());
 
             if (found_teach != null)
@@ -91,7 +94,7 @@ namespace RaspSGkVk2.Models
                     PeerId = groupupdate.Message.PeerId.ToString()
                 };
 
-                WriteWaring($"Задача #{temp.IdTask} была добавлена. Тип - преподаватель. Значение - #{temp.Value}. Беседа #{temp.PeerId}");
+                WriteWaring($"[NewTask] #{temp.IdTask} была добавлена. Тип - {temp.TypeTask}. Значение - #{temp.Value}. Беседа #{temp.PeerId}");
                 settings.SettingsVkList.Add(temp);
                 settings.SaveSettings();
 
@@ -108,7 +111,7 @@ namespace RaspSGkVk2.Models
                     PeerId = groupupdate.Message.PeerId.ToString()
                 };
 
-                WriteWaring($"Задача #{temp.IdTask} была добавлена. Тип - преподаватель. Значение - #{temp.Value}. Беседа #{temp.PeerId}");
+                WriteWaring($"[NewTask] Задача #{temp.IdTask} была добавлена. Тип - {temp.TypeTask}. Значение - #{temp.Value}. Беседа #{temp.PeerId}");
                 settings.SettingsVkList.Add(temp);
                 settings.SaveSettings();
                 return $"Расписание для {found_group.name} привязано к беседе";
@@ -127,7 +130,7 @@ namespace RaspSGkVk2.Models
                 settings.SettingsVkList.Remove(find);
                 WriteWaring("Внесены изменения в список задач");
                 settings.SaveSettings();
-                return $"Задача #{find.IdTask} была отменена для беседы #{groupupdate.Message.PeerId}";
+                return $"[DeleteTask] Задача #{find.IdTask} была отменена для беседы #{groupupdate.Message.PeerId}";
             }
 
             return $"Ошибка при удаление задачи. Смотри консоль";
@@ -177,7 +180,7 @@ namespace RaspSGkVk2.Models
 
             settings.AdminsList.Add(admin);
             settings.SaveSettings();
-            WriteWaring($"Внесены изменения в список администраторов #{admin.Id} -> #{admin.Value}");
+            WriteWaring($"[Admin] Внесены изменения в список администраторов #{admin.Id} -> #{admin.Value}");
 
             return $"{user_msg[1]} добавлен в администраторы";
 
@@ -186,7 +189,7 @@ namespace RaspSGkVk2.Models
         public string SendAllResponse(GroupUpdate groupupdate, string[] user_msg)
         {
             if (!isAdmin(groupupdate, user_msg))
-                return "Нет прав";
+                return "[!]Нет прав";
 
             string command = "";
             foreach (var item in user_msg)
@@ -197,17 +200,17 @@ namespace RaspSGkVk2.Models
 
             command = command.Remove(0, 1);
 
-            WriteWaring($"Пользователь {groupupdate.Message.FromId} иниициировал рассылку c текстом: {command}");
+            WriteWaring($"[Message.Send] Пользователь {groupupdate.Message.FromId} иниициировал рассылку c текстом: {command}");
             SendAll(command);
 
-            return $"Рассылка выполнена";
+            return $"[!] Рассылка выполнена";
 
         }
         // Вывод всех задач
         public string GetTasks(GroupUpdate groupupdate, string[] user_msg)
         {
             if (!isAdmin(groupupdate, user_msg))
-                return "Нет прав";
+                return "[!] Нет прав";
 
             string text = "Активные задачи\n";
 
@@ -224,7 +227,7 @@ namespace RaspSGkVk2.Models
         public string DeleteTaskAdmin(GroupUpdate groupupdate, string[] user_msg)
         {
             if (!isAdmin(groupupdate, user_msg))
-                return "Нет прав";
+                return "[!] Нет прав";
 
             var findtask = settings.SettingsVkList.FirstOrDefault(x => x.IdTask.ToString() == user_msg[1]);
             if (findtask != null)
@@ -235,7 +238,7 @@ namespace RaspSGkVk2.Models
             }
             else
             {
-                return $"Ошибка при удалении";
+                return $"[!] Ошибка при удалении";
             }
 
         }
@@ -251,10 +254,10 @@ namespace RaspSGkVk2.Models
         public string ReloadConfig(GroupUpdate groupupdate, string[] user_msg)
         {
             if (!isAdmin(groupupdate, user_msg))
-                return "Нет прав";
+                return "[!] Нет прав";
 
             settings.LoadSettings();
-            return $"Конфигурация перезагружена";
+            return $"[!] Конфигурация перезагружена";
         }
 
 
@@ -294,7 +297,7 @@ namespace RaspSGkVk2.Models
 
             var find = settings.Books.FirstOrDefault(x => x.Word == new_text[0]);
             if (find != null)
-                return $"Ошибка при занесение данных в словарь. Слово уже существует. Используйте !редсловарь";
+                return $"[!] Ошибка при занесение данных в словарь. Слово уже существует. Используйте !редсловарь";
 
             Book book = new Book()
             {
@@ -306,9 +309,9 @@ namespace RaspSGkVk2.Models
             settings.Books.Add(book);
             settings.SaveSettings();
 
-            WriteWaring($"Внесены изменения в словарь. #{book.Id} -> {book.Word} => {book.Value}");
+            WriteWaring($"[Book] Внесены изменения в словарь. #{book.Id} -> {book.Word} => {book.Value}");
 
-            return $"Словарь изменен";
+            return $"[!] Словарь изменен";
         }
         // Редактирование словаря
         public string EditBook(GroupUpdate groupupdate, string[] user_msg)
@@ -325,16 +328,16 @@ namespace RaspSGkVk2.Models
 
             var find = settings.Books.FirstOrDefault(x => x.Word == new_text[0]);
             if (find == null)
-                return $"Ошибка при изменений в словарь. Слово не найдено! - Используйте !словарь";
+                return $"[!] Ошибка при изменений в словарь. Слово не найдено! - Используйте !словарь";
 
             find.Word = new_text[0];
             find.Value = new_text[1];
 
             settings.SaveSettings();
 
-            WriteWaring($"Внесены изменения в словарь. #{find.Id} -> {find.Word} => {find.Value}");
+            WriteWaring($"[Book] Внесены изменения в словарь. #{find.Id} -> {find.Word} => {find.Value}");
 
-            return $"Словарь изменен";
+            return $"[!] Словарь изменен";
         }
         // Показ словаря
         public string CheckBook(GroupUpdate groupupdate, string[] user_msg)
@@ -353,9 +356,9 @@ namespace RaspSGkVk2.Models
 
             var find = settings.Books.FirstOrDefault(x => x.Word == text);
             if (find == null)
-                return $"Слово не найдено в словаре";
+                return $"[!] Слово не найдено в словаре";
 
-            string msg = $"На слово '{find.Word}' могу отвечать: ";
+            string msg = $"[!] На слово '{find.Word}' могу отвечать: ";
 
             var answer = find.Value.Split(";");
 
@@ -396,6 +399,15 @@ namespace RaspSGkVk2.Models
             }
 
 
+        }
+        public string GetAllBook(GroupUpdate groupupdate, string[] user_msg)
+        {
+            Send($"# | Слово | Ответ ", groupupdate.Message.FromId);
+            foreach (var item in settings.Books)
+            {
+                Send($"#{item.Id}| {item.Word} | {item.Value}", groupupdate.Message.FromId);
+            }
+            return $"[!] Список окончен";
         }
 
 
@@ -510,8 +522,7 @@ namespace RaspSGkVk2.Models
         /// <param name="peerid"></param>
         public void Send(string text, long? peerid)
         {
-            Write($"[MessageSend] -> Беседа #{peerid}.");
-            //Write($"[MessageSend] -> Беседа #{peerid}. Содержимое: {text}");
+            Write($"[Message.Send] -> Беседа #{peerid}. Содержимое {text.Replace("\n", " ")}");
             try
             {
                 api.Messages.Send(new MessagesSendParams()

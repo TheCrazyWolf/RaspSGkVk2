@@ -23,33 +23,6 @@ namespace RaspSGkVk2
 
             Auth();
 
-            //KeyboardBuilder key = new KeyboardBuilder();
-            //key.AddButton(new AddButtonParams()
-            //{
-            //    Label = "test"
-            //});
-
-            //key.AddButton(new AddButtonParams()
-            //{
-            //    Label = "test2"
-            //});
-
-            //key.AddButton(new AddButtonParams()
-            //{
-            //    Label = "test3"
-            //});
-
-            //MessageKeyboard keyboard = key.Build();
-
-            //api.Messages.Send(
-            //    new VkNet.Model.RequestParams.MessagesSendParams()
-            //    {
-            //        PeerId = 133156422,
-            //        Message = "Выбери кнопку",
-            //        RandomId = new Random().Next(),
-            //        Keyboard = keyboard
-            //    });
-
             Task.Run(()=> lpoll.StartLongPoll());
 
             Controller controller = new Controller();
@@ -73,12 +46,14 @@ namespace RaspSGkVk2
                 {
                     AccessToken = settings.TokenVk
                 });
-                WriteWaring("[VK] Успешная авторизация");
+                WriteWaring("[API] Успешная авторизация");
 
             }
             catch (Exception ex)
             {
+                WriteWaring("[API] Ошибка авторизации ->");
                 WriteError(ex.ToString());
+                Environment.Exit(-1);
                 
             }
 

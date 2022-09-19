@@ -113,6 +113,7 @@ namespace RaspSGkVk2
         {
             var json = JsonSerializer.Serialize<Settings>(this);
             File.WriteAllText("settings.json",json);
+            WriteWaring($"[!] Сохранены настройки");
         }
 
 

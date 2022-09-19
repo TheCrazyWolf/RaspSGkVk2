@@ -54,7 +54,7 @@ namespace RaspSGkVk2
                 
                 if (item.Type == GroupUpdateType.MessageNew)
                 {
-                    Write($"[MessageNew] <- Беседа #{item.Message.PeerId}. Отправитель #{item.Message.FromId}. Содержимое: {item.Message.Text}");
+                    Write($"[Message.New] <- Беседа #{item.Message.PeerId}. Отправитель #{item.Message.FromId}. Содержимое: {item.Message.Text}");
 
                     var user_msg = new Regex("\\[.*\\][\\s,]*").Replace(item.Message.Text.ToLower(),"").Split(" ");
 
@@ -128,6 +128,9 @@ namespace RaspSGkVk2
                         case "!слово":
                             Send(controller.CheckBook(item, user_msg), item.Message.PeerId);
                             break;
+                        case "!весьсловарь":
+                            Send(controller.GetAllBook(item, user_msg), item.Message.PeerId);
+                            break;
                         default:
                             Send(controller.GetAnswer(item, user_msg), item.Message.PeerId);
                             break;
@@ -148,8 +151,7 @@ namespace RaspSGkVk2
         /// <param name="peerid"></param>
         public void Send(string text, long? peerid)
         {
-            //Write($"[MessageSend] -> Беседа #{peerid}. Содержимое: {text}");
-            Write($"[MessageSend] -> Беседа #{peerid}.");
+            Write($"[Message.Send] -> Беседа #{peerid}. Содержимое {text.Replace("\n", " ")}");
             try
             {
                 api.Messages.Send(new MessagesSendParams()
