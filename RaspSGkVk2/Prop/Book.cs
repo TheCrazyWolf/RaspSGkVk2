@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 
 namespace RaspSGkVk2.Prop
 {
-    internal class Value
+    internal class Book
     {
-        [Key]
-        public int IdValue { get; set; }
-        public float ID { get; set; }
 
+        [Key]
+        public int IdWord { get; set; }
+        public string Word { get; set; }
+        public string Answers { get; set; }
     }
 }

@@ -16,41 +16,26 @@ namespace RaspSGkVk2
         static public VkApi api = new VkApi();
         //Экземпляр для работы с ВК АПИ
         static public LongPollVk lpoll = new LongPollVk();
-        
+
         static void Main(string[] args)
         {
-            
 
-            if(!File.Exists("prop.db"))
+            Prop.Tasks task = new Prop.Tasks()
             {
-                Prop.AppContext ef1 = new Prop.AppContext();
-                ef1.Database.EnsureCreated();
+                PeerId = 345,
+                TypeTask = 'T',
+                Value = "34"
+            };
+
+            using (Prop.BotDB ef = new Prop.BotDB() )
+            {
+                //ef.Add(task);
+                //ef.Add(task);
+                //ef.Add(task);
+                //ef.Add(task);
+                //ef.SaveChanges();
             }
 
-
-            Prop.Tasks tasks = new Prop.Tasks();
-            Prop.Value val = new Prop.Value();
-            val.ID = 2345345;
-
-            tasks.PropsValue = new System.Collections.Generic.List<Prop.Value>();
-            tasks.PropsValue.Add(val);
-            tasks.PropsValue.Add(val);
-
-            Prop.Tasks tasks2 = new Prop.Tasks();
-            tasks2.PropsValue = new System.Collections.Generic.List<Prop.Value>();
-            tasks2.PropsValue.Add(val);
-            tasks2.PropsValue.Add(val);
-
-            Prop.Tasks tasks3 = new Prop.Tasks();
-            tasks3.PropsValue = new System.Collections.Generic.List<Prop.Value>();
-            tasks3.PropsValue.Add(val);
-            tasks3.PropsValue.Add(val);
-
-            Prop.AppContext ef = new Prop.AppContext();
-            ef.Add(tasks);
-            ef.Add(tasks2);
-            ef.Add(tasks3);
-            ef.SaveChanges();
 
 
             //settings = settings.LoadSettings();

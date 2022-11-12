@@ -11,14 +11,10 @@ namespace RaspSGkVk2.Prop
     {
 
         [Key]
-        public int IdSetting { get; set; }
-        //Токен от группы ВК
-        public string TokenVk { get; set; }
-        //Тайм аут между запросами
-        public int Timer { get; set; }
-        // ID группы
-        public long IdGroup { get; set; }
-        //Лист с настройками бесед
+        public int IdSetting { get; set; } // Инкремент
+        public string TokenVk { get; set; } //Токен от группы ВК
+        public long IdGroup { get; set; } //ID группы
+        public int Timer { get; set; } // Ожидание между запросом
 
     }
 }

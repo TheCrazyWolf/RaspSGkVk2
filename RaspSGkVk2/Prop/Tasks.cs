@@ -12,13 +12,12 @@ namespace RaspSGkVk2.Prop
     {
 
         [Key]
-        public int IdTask { get; set; }
-        public char? TypeTask { get; set; }
-        public List<Value> PropsValue { get; set; }
-        public float? PeerId { get; set; }
+        public int IdTask { get; set; }  //Инкремент
+        public char? TypeTask { get; set; } //Тип расписания
+        public long? PeerId { get; set; } //ID беседы
+        public string? Value { get; set; } //ID препода или группы (допускается массив через ;
 
-        //public RaspApi Result { get; set; }
-        public string? ResultText { get; set; }
+        public string? ResultText { get; set; } //Прошлый ответ
 
     }
 }
