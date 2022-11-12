@@ -10,6 +10,9 @@ namespace RaspSGkVk2
 {
     internal class Program
     {
+
+
+
         // Экземпляр для доступа к настройкам
         static public Settings settings = new Settings();
         //Экземпляр для доступа к ВК АПИ
@@ -19,24 +22,6 @@ namespace RaspSGkVk2
 
         static void Main(string[] args)
         {
-
-            Prop.Tasks task = new Prop.Tasks()
-            {
-                PeerId = 345,
-                TypeTask = 'T',
-                Value = "34"
-            };
-
-            using (Prop.BotDB ef = new Prop.BotDB() )
-            {
-                //ef.Add(task);
-                //ef.Add(task);
-                //ef.Add(task);
-                //ef.Add(task);
-                //ef.SaveChanges();
-            }
-
-
 
             //settings = settings.LoadSettings();
 
