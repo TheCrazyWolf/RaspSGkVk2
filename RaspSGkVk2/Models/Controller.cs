@@ -24,9 +24,8 @@ namespace RaspSGkVk2.Models
             {
                 Thread.Sleep(settings.Timer);
 
-                //if (DateTime.Now.Hour >= 23 || DateTime.Now.Hour <= 8)
-                //    Write($"[STOP] Ночное время");
-                //    continue;
+                if (DateTime.Now.Hour >= 22 || DateTime.Now.Hour <= 10)
+                    continue;
 
                 foreach (var item in settings.SettingsVkList)
                 {
@@ -504,6 +503,8 @@ namespace RaspSGkVk2.Models
                 using (var wb = new WebClient())
                 {
                     wb.Headers.Set("Accept", "application/json");
+                    wb.Headers.Set("origin", "http://samgk.ru");
+                    wb.Headers.Set("Referer", "samgk.ru");
                     return wb.DownloadString(url);
                 }
             }
